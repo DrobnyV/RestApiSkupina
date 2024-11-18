@@ -55,10 +55,76 @@
         <button onclick="addFirm()">Add Firm</button>
     </div>
 
+    <h2>Update a Firm</h2>
+    <div class="form-group">
+        <label for="updateFirmId">Firm ID</label>
+        <input type="text" id="updateFirmId" placeholder="Enter firm ID">
+    </div>
+    <div class="form-group">
+        <label for="updateFirmName">Name</label>
+        <input type="text" id="updateFirmName" placeholder="Enter firm name">
+    </div>
+    <div class="form-group">
+        <label for="updateFirmSurname">Surname</label>
+        <input type="text" id="updateFirmSurname" placeholder="Enter surname">
+    </div>
+    <div class="form-group">
+        <label for="updateFirmEmail">Email</label>
+        <input type="email" id="updateFirmEmail" placeholder="Enter email">
+    </div>
+    <div class="form-group">
+        <label for="updateFirmPhone">Phone</label>
+        <input type="text" id="updateFirmPhone" placeholder="Enter phone">
+    </div>
+    <div class="form-group">
+        <button onclick="updateFirm()">Update Firm</button>
+    </div>
+
+    <h2>Delete a Firm</h2>
+    <div class="form-group">
+        <label for="deleteFirmId">Firm ID</label>
+        <input type="text" id="deleteFirmId" placeholder="Enter firm ID">
+    </div>
+    <div class="form-group">
+        <button onclick="deleteFirm()">Delete Firm</button>
+    </div>
+
+    <!-- Existing Sections (Get All Firms, Get Firm by ID, Add Firm, etc.) -->
+    <h2>Add a New Firm</h2>
+    <div class="form-group">
+        <label for="firmName">Name</label>
+        <input type="text" id="firmName" placeholder="Enter firm name">
+    </div>
+    <div class="form-group">
+        <label for="firmSurname">Surname</label>
+        <input type="text" id="firmSurname" placeholder="Enter surname">
+    </div>
+    <div class="form-group">
+        <label for="firmEmail">Email</label>
+        <input type="email" id="firmEmail" placeholder="Enter email">
+    </div>
+    <div class="form-group">
+        <label for="firmPhone">Phone</label>
+        <input type="text" id="firmPhone" placeholder="Enter phone">
+    </div>
+    <div class="form-group">
+        <button onclick="addFirm()">Add Firm</button>
+    </div>
+    
+
     <!-- Button to Get All Firms -->
     <h2>Get All Firms</h2>
     <div class="form-group">
         <button onclick="getFirms()">Get Firms</button>
+    </div>
+
+    <h2>Get Firm by ID</h2>
+    <div class="form-group">
+        <label for="firmById">Firm ID</label>
+        <input type="text" id="firmById" placeholder="Enter firm ID">
+    </div>
+    <div class="form-group">
+        <button onclick="getFirmById()">Get Firm</button>
     </div>
 
     <!-- Form to Get Contacts for a Specific Firm -->
@@ -71,33 +137,13 @@
         <button onclick="getContacts()">Get Contacts</button>
     </div>
 
-    <!-- Form to Add a Contact to a Firm -->
-    <h2>Add a Contact to a Firm</h2>
-    <div class="form-group">
-        <label for="contactFirmId">Firm ID</label>
-        <input type="text" id="contactFirmId" placeholder="Enter firm ID">
-    </div>
-    <div class="form-group">
-        <label for="contactName">Name</label>
-        <input type="text" id="contactName" placeholder="Enter contact name">
-    </div>
-    <div class="form-group">
-        <label for="contactEmail">Email</label>
-        <input type="email" id="contactEmail" placeholder="Enter contact email">
-    </div>
-    <div class="form-group">
-        <label for="contactPhone">Phone</label>
-        <input type="text" id="contactPhone" placeholder="Enter contact phone">
-    </div>
-    <div class="form-group">
-        <button onclick="addContact()">Add Contact</button>
-    </div>
+
 
     <!-- Result Display -->
     <div id="result" class="result"></div>
 
     <script>
-        const apiBase = ''; // Your API base URL, e.g., '/'
+        const apiBase = '';
 
         function displayResult(data) {
             const result = document.getElementById('result');
@@ -124,28 +170,83 @@
             const data = await response.json();
             displayResult(data);
         }
+        
+        async function getFirmById() {
+            const firmId = document.getElementById('firmById').value;
+            if (!firmId) {
+                alert('Please enter a firm ID.');
+                return;
+            }
+
+            const response = await fetch(`${apiBase}/firms/${firmId}`);
+            if (response.ok) {
+                const data = await response.json();
+                displayResult(data);
+            } else {
+                displayResult({ error: `Failed to fetch firm with ID ${firmId}`, status: response.status });
+            }
+        }
+
+        async function updateFirm() {
+            const id = document.getElementById('updateFirmId').value;
+            const name = document.getElementById('updateFirmName').value;
+            const surname = document.getElementById('updateFirmSurname').value;
+            const email = document.getElementById('updateFirmEmail').value;
+            const phone = document.getElementById('updateFirmPhone').value;
+
+            if (!id) {
+                alert('Please enter a firm ID.');
+                return;
+            }
+
+            const response = await fetch(`${apiBase}/firms/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, surname, email, phone })
+            });
+
+            const data = await response.json();
+            displayResult(data);
+        }
+
+        async function deleteFirm() {
+            const id = document.getElementById('deleteFirmId').value;
+
+            if (!id) {
+                alert('Please enter a firm ID.');
+                return;
+            }
+
+            const response = await fetch(`${apiBase}/firms/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                displayResult({ message: `Firm with ID ${id} deleted successfully` });
+            } else {
+                const data = await response.json();
+                displayResult(data);
+            }
+        }
+
 
         async function getContacts() {
-            const firmId = document.getElementById('firmId').value;
-            const response = await fetch(`${apiBase}/contacts/${firmId}`);
-            const data = await response.json();
-            displayResult(data);
-        }
+    const firmId = document.getElementById('firmId').value;
+    if (!firmId) {
+        alert('Please enter a Firm ID.');
+        return;
+    }
 
-        async function addContact() {
-            const firmId = document.getElementById('contactFirmId').value;
-            const name = document.getElementById('contactName').value;
-            const email = document.getElementById('contactEmail').value;
-            const phone = document.getElementById('contactPhone').value;
+    const response = await fetch(`${apiBase}/contacts/${firmId}`);
+    if (response.ok) {
+        const data = await response.json();
+        displayResult(data);
+    } else {
+        displayResult({ error: 'Failed to fetch contacts', status: response.status });
+    }
+}
 
-            const response = await fetch(`${apiBase}/contacts/${firmId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, phone })
-            });
-            const data = await response.json();
-            displayResult(data);
-        }
+
     </script>
 
 </body>

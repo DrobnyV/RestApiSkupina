@@ -26,25 +26,17 @@ switch ($requestMethod) {
 function getContactsByFirmId($firmId)
 {
     global $conn;
-    $stmt = $conn->prepare("SELECT * FROM contacts WHERE firm_id = ?");
-    $stmt->bind_param("i", $firmId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $contacts = $result->fetch_all(MYSQLI_ASSOC);
+
+    // If no contacts are found, get the details from the firm table
+    if (empty($contacts)) {
+        $stmt = $conn->prepare("SELECT email, phone FROM firm WHERE id = ?");
+        $stmt->bind_param("i", $firmId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $contacts = $result->fetch_all(MYSQLI_ASSOC);
+    }
+
     echo json_encode($contacts);
 }
 
-function saveContact($firmId)
-{
-    global $conn;
-    $data = json_decode(file_get_contents('php://input'), true);
-    $stmt = $conn->prepare("INSERT INTO contacts (firm_id, name, email, phone) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("isss", $firmId, $data['name'], $data['email'], $data['phone']);
-    if ($stmt->execute()) {
-        echo json_encode(['message' => 'Contact created', 'id' => $conn->insert_id]);
-    } else {
-        http_response_code(500);
-        echo json_encode(['error' => 'Failed to create contact']);
-    }
-}
 ?>
