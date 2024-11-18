@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        .event { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+        .event h3 { margin: 0; }
+        .event p { margin: 5px 0; }
+        button { margin: 5px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Event Manager</h1>
+    <form id="addEventForm">
+        <h3>Add New Event</h3>
+        <input type="text" id="name" placeholder="Event Name" required><br>
+        <textarea id="description" placeholder="Description"></textarea><br>
+        <input type="datetime-local" id="timeStart" required>
+        <input type="datetime-local" id="timeEnd"><br>
+        <button type="submit">Add Event</button>
+    </form>
+    <hr>
+    <h3>Event List</h3>
+    <div id="eventList"></div>
+</div>
+
+<script>
+    const apiBaseUrl = 'http://localhost:3000/events';
+
+    // Function to fetch and display all events
+    const fetchEvents = async () => {
+        try {
+            const response = await fetch(apiBaseUrl);
+            const events = await response.json();
+            const eventList = document.getElementById('eventList');
+            eventList.innerHTML = ''; // Clear previous content
+
+            events.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'event';
+                eventDiv.innerHTML = `
+                        <h3>${event.name}</h3>
+                        <p><strong>Description:</strong> ${event.description}</p>
+                        <p><strong>Start:</strong> ${event.time_start}</p>
+                        <p><strong>End:</strong> ${event.time_end || 'N/A'}</p>
+                        <button onclick="deleteEvent(${event.id})">Delete</button>
+                    `;
+                eventList.appendChild(eventDiv);
+            });
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    };
+
+    // Function to add a new event
+    const addEvent = async (event) => {
+        event.preventDefault();
+        const name = document.getElementById('name').value;
+        const description = document.getElementById('description').value;
+        const timeStart = document.getElementById('timeStart').value;
+        const timeEnd = document.getElementById('timeEnd').value;
+
+        try {
+            await fetch(apiBaseUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, time_start: timeStart, time_end: timeEnd })
+            });
+            document.getElementById('addEventForm').reset();
+            fetchEvents(); // Refresh the event list
+        } catch (error) {
+            console.error('Error adding event:', error);
+        }
+    };
+
+    // Function to delete an event
+    const deleteEvent = async (eventId) => {
+        try {
+            await fetch(`${apiBaseUrl}/${eventId}`, { method: 'DELETE' });
+            fetchEvents(); // Refresh the event list
+        } catch (error) {
+            console.error('Error deleting event:', error);
+        }
+    };
+
+    // Attach event listener to form submission
+    document.getElementById('addEventForm').addEventListener('submit', addEvent);
+
+    // Fetch events on page load
+    fetchEvents();
+</script>
+</body>
+</html>
