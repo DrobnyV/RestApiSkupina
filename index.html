@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group button {
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<h1>API Tester</h1>
+
+<!-- Form to Add a New Firm -->
+<h2>Add a New Firm</h2>
+<div class="form-group">
+    <label for="firmName">Name</label>
+    <input type="text" id="firmName" placeholder="Enter firm name">
+</div>
+<div class="form-group">
+    <label for="firmSurname">Surname</label>
+    <input type="text" id="firmSurname" placeholder="Enter surname">
+</div>
+<div class="form-group">
+    <label for="firmEmail">Email</label>
+    <input type="email" id="firmEmail" placeholder="Enter email">
+</div>
+<div class="form-group">
+    <label for="firmPhone">Phone</label>
+    <input type="text" id="firmPhone" placeholder="Enter phone">
+</div>
+<div class="form-group">
+    <button onclick="addFirm()">Add Firm</button>
+</div>
+
+<!-- Button to Get All Firms -->
+<h2>Get All Firms</h2>
+<div class="form-group">
+    <button onclick="getFirms()">Get Firms</button>
+</div>
+
+<!-- Form to Get Contacts for a Specific Firm -->
+<h2>Get Contacts for a Firm</h2>
+<div class="form-group">
+    <label for="firmId">Firm ID</label>
+    <input type="text" id="firmId" placeholder="Enter firm ID">
+</div>
+<div class="form-group">
+    <button onclick="getContacts()">Get Contacts</button>
+</div>
+
+<!-- Form to Add a Contact to a Firm -->
+<h2>Add a Contact to a Firm</h2>
+<div class="form-group">
+    <label for="contactFirmId">Firm ID</label>
+    <input type="text" id="contactFirmId" placeholder="Enter firm ID">
+</div>
+<div class="form-group">
+    <label for="contactName">Name</label>
+    <input type="text" id="contactName" placeholder="Enter contact name">
+</div>
+<div class="form-group">
+    <label for="contactEmail">Email</label>
+    <input type="email" id="contactEmail" placeholder="Enter contact email">
+</div>
+<div class="form-group">
+    <label for="contactPhone">Phone</label>
+    <input type="text" id="contactPhone" placeholder="Enter contact phone">
+</div>
+<div class="form-group">
+    <button onclick="addContact()">Add Contact</button>
+</div>
+
+<!-- Result Display -->
+<div id="result" class="result"></div>
+
+<br>
+<br>
+
+<div class="container">
+    <h1>Event Manager</h1>
+    <form id="addEventForm">
+        <h3>Add New Event</h3>
+        <label for="name"></label>
+        <input type="text" id="name" placeholder="Event Name" required><br>
+        <label for="description"></label><textarea id="description" placeholder="Description"></textarea><br>
+        <label for="timeStart">Start of event:</label>
+        <input type="datetime-local" id="timeStart" required>
+        <label for="timeEnd">End of event:</label>
+        <input type="datetime-local" id="timeEnd"><br>
+        <button type="submit">Add Event</button>
+    </form>
+
+    <hr>
+
+    <form id="updateEventForm" style="display: none;">
+        <h3>Update Event</h3>
+        <input type="hidden" id="updateEventId">
+        <label for="updateName">Name:</label><input type="text" id="updateName" placeholder="Event Name" required><br>
+        <label for="updateDescription">Description:</label><textarea id="updateDescription" placeholder="Description"></textarea><br>
+        <label for="updateTimeStart">Start of event:</label><input type="datetime-local" id="updateTimeStart" required>
+        <label for="updateTimeEnd">End of event:</label><input type="datetime-local" id="updateTimeEnd"><br>
+        <button type="submit">Update Event</button>
+        <button type="button" onclick="cancelUpdate()">Cancel</button>
+    </form>
+
+    <hr>
+
+    <h3>Event List</h3>
+    <div id="eventList"></div>
+</div>
+
+<script>
+    const apiBase = ''; // Your API base URL, e.g., '/'
+
+    function displayResult(data) {
+        const result = document.getElementById('result');
+        result.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function addFirm() {
+        const name = document.getElementById('firmName').value;
+        const surname = document.getElementById('firmSurname').value;
+        const email = document.getElementById('firmEmail').value;
+        const phone = document.getElementById('firmPhone').value;
+
+        const response = await fetch(`${apiBase}/firms/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, surname, email, phone })
+        });
+        const data = await response.json();
+        displayResult(data);
+    }
+
+    async function getFirms() {
+        const response = await fetch(`${apiBase}/firms/list`);
+        const data = await response.json();
+        displayResult(data);
+    }
+
+    async function getContacts() {
+        const firmId = document.getElementById('firmId').value;
+        const response = await fetch(`${apiBase}/contacts/${firmId}`);
+        const data = await response.json();
+        displayResult(data);
+    }
+
+    async function addContact() {
+        const firmId = document.getElementById('contactFirmId').value;
+        const name = document.getElementById('contactName').value;
+        const email = document.getElementById('contactEmail').value;
+        const phone = document.getElementById('contactPhone').value;
+
+        const response = await fetch(`${apiBase}/contacts/${firmId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, phone })
+        });
+        const data = await response.json();
+        displayResult(data);
+    }
+
+    const apiBaseUrl = '/node/events';
+
+    // Function to fetch and display all events
+    const fetchEvents = async () => {
+        try {
+            const response = await fetch(apiBaseUrl);
+            const events = await response.json();
+            const eventList = document.getElementById('eventList');
+            eventList.innerHTML = ''; // Clear previous content
+
+            events.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'event';
+                eventDiv.innerHTML = `
+                        <h3>${event.name}</h3>
+                        <p><strong>Description:</strong> ${event.description}</p>
+                        <p><strong>Start:</strong> ${event.time_start}</p>
+                        <p><strong>End:</strong> ${event.time_end || 'N/A'}</p>
+                        <button onclick="editEvent(${event.id})">Edit</button>
+                        <button onclick="deleteEvent(${event.id})">Delete</button>
+                    `;
+                eventList.appendChild(eventDiv);
+            });
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    };
+
+    // Function to add a new event
+    const addEvent = async (event) => {
+        event.preventDefault();
+        const name = document.getElementById('name').value;
+        const description = document.getElementById('description').value;
+        const timeStart = document.getElementById('timeStart').value;
+        const timeEnd = document.getElementById('timeEnd').value;
+
+        try {
+            await fetch(apiBaseUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, time_start: timeStart, time_end: timeEnd })
+            });
+            document.getElementById('addEventForm').reset();
+            fetchEvents(); // Refresh the event list
+        } catch (error) {
+            console.error('Error adding event:', error);
+        }
+    };
+
+    const editEvent = async (eventId) => {
+        try {
+            const response = await fetch(`${apiBaseUrl}/${eventId}`);
+            const event = await response.json();
+
+            // Populate the update form with event data
+            document.getElementById('updateEventId').value = event.id; // Set the event ID
+            document.getElementById('updateName').value = event.name;
+            document.getElementById('updateDescription').value = event.description;
+            document.getElementById('updateTimeStart').value = event.time_start.slice(0, 16); // For datetime-local format
+            document.getElementById('updateTimeEnd').value = event.time_end ? event.time_end.slice(0, 16) : '';
+
+            // Show the update form
+            document.getElementById('updateEventForm').style.display = 'block';
+        } catch (error) {
+            console.error('Error fetching event for update:', error);
+        }
+    };
+
+    // Update an event
+    const updateEvent = async (event) => {
+        event.preventDefault();
+        const eventId = document.getElementById('updateEventId').value; // Get event ID from hidden field
+        const name = document.getElementById('updateName').value;
+        const description = document.getElementById('updateDescription').value;
+        const timeStart = document.getElementById('updateTimeStart').value;
+        const timeEnd = document.getElementById('updateTimeEnd').value;
+
+        try {
+            const response = await fetch(`${apiBaseUrl}/${eventId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, time_start: timeStart, time_end: timeEnd }),
+            });
+
+            if (!response.ok) throw new Error('Failed to update event.');
+
+            document.getElementById('updateEventForm').reset();
+            document.getElementById('updateEventForm').style.display = 'none';
+            fetchEvents(); // Refresh the event list
+        } catch (error) {
+            console.error('Error updating event:', error);
+        }
+    };
+
+
+    // Cancel update
+    const cancelUpdate = () => {
+        document.getElementById('updateEventForm').reset();
+        document.getElementById('updateEventForm').style.display = 'none';
+    };
+
+    // Function to delete an event
+    const deleteEvent = async (eventId) => {
+        try {
+            await fetch(`${apiBaseUrl}/${eventId}`, { method: 'DELETE' });
+            fetchEvents(); // Refresh the event list
+        } catch (error) {
+            console.error('Error deleting event:', error);
+        }
+    };
+
+    // Attach event listener to form submission
+    document.getElementById('addEventForm').addEventListener('submit', addEvent);
+    document.getElementById('updateEventForm').addEventListener('submit', updateEvent);
+
+
+    // Fetch events on page load
+    fetchEvents();
+</script>
+
+</body>
+</html>
