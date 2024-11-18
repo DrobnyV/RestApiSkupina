@@ -18,13 +18,31 @@
     <h1>Event Manager</h1>
     <form id="addEventForm">
         <h3>Add New Event</h3>
+        <label for="name"></label>
         <input type="text" id="name" placeholder="Event Name" required><br>
-        <textarea id="description" placeholder="Description"></textarea><br>
+        <label for="description"></label><textarea id="description" placeholder="Description"></textarea><br>
+        <label for="timeStart">Start of event:</label>
         <input type="datetime-local" id="timeStart" required>
+        <label for="timeEnd">End of event:</label>
         <input type="datetime-local" id="timeEnd"><br>
         <button type="submit">Add Event</button>
     </form>
+
     <hr>
+
+    <form id="updateEventForm" style="display: none;">
+        <h3>Update Event</h3>
+        <input type="hidden" id="updateEventId">
+        <label for="updateName">Name:</label><input type="text" id="updateName" placeholder="Event Name" required><br>
+        <label for="updateDescription">Description:</label><textarea id="updateDescription" placeholder="Description"></textarea><br>
+        <label for="updateTimeStart">Start of event:</label><input type="datetime-local" id="updateTimeStart" required>
+        <label for="updateTimeEnd">End of event:</label><input type="datetime-local" id="updateTimeEnd"><br>
+        <button type="submit">Update Event</button>
+        <button type="button" onclick="cancelUpdate()">Cancel</button>
+    </form>
+
+    <hr>
+
     <h3>Event List</h3>
     <div id="eventList"></div>
 </div>
@@ -48,6 +66,7 @@
                         <p><strong>Description:</strong> ${event.description}</p>
                         <p><strong>Start:</strong> ${event.time_start}</p>
                         <p><strong>End:</strong> ${event.time_end || 'N/A'}</p>
+                        <button onclick="editEvent(${event.id})">Edit</button>
                         <button onclick="deleteEvent(${event.id})">Delete</button>
                     `;
                 eventList.appendChild(eventDiv);
@@ -78,6 +97,58 @@
         }
     };
 
+    const editEvent = async (eventId) => {
+        try {
+            const response = await fetch(`${apiBaseUrl}/${eventId}`);
+            const event = await response.json();
+
+            // Populate the update form with event data
+            document.getElementById('updateEventId').value = event.id; // Set the event ID
+            document.getElementById('updateName').value = event.name;
+            document.getElementById('updateDescription').value = event.description;
+            document.getElementById('updateTimeStart').value = event.time_start.slice(0, 16); // For datetime-local format
+            document.getElementById('updateTimeEnd').value = event.time_end ? event.time_end.slice(0, 16) : '';
+
+            // Show the update form
+            document.getElementById('updateEventForm').style.display = 'block';
+        } catch (error) {
+            console.error('Error fetching event for update:', error);
+        }
+    };
+
+    // Update an event
+    const updateEvent = async (event) => {
+        event.preventDefault();
+        const eventId = document.getElementById('updateEventId').value; // Get event ID from hidden field
+        const name = document.getElementById('updateName').value;
+        const description = document.getElementById('updateDescription').value;
+        const timeStart = document.getElementById('updateTimeStart').value;
+        const timeEnd = document.getElementById('updateTimeEnd').value;
+
+        try {
+            const response = await fetch(`${apiBaseUrl}/${eventId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, time_start: timeStart, time_end: timeEnd }),
+            });
+
+            if (!response.ok) throw new Error('Failed to update event.');
+
+            document.getElementById('updateEventForm').reset();
+            document.getElementById('updateEventForm').style.display = 'none';
+            fetchEvents(); // Refresh the event list
+        } catch (error) {
+            console.error('Error updating event:', error);
+        }
+    };
+
+
+    // Cancel update
+    const cancelUpdate = () => {
+        document.getElementById('updateEventForm').reset();
+        document.getElementById('updateEventForm').style.display = 'none';
+    };
+
     // Function to delete an event
     const deleteEvent = async (eventId) => {
         try {
@@ -90,6 +161,8 @@
 
     // Attach event listener to form submission
     document.getElementById('addEventForm').addEventListener('submit', addEvent);
+    document.getElementById('updateEventForm').addEventListener('submit', updateEvent);
+
 
     // Fetch events on page load
     fetchEvents();

@@ -19,6 +19,10 @@ db.connect(err => {
     console.log('Connected to the MySQL database!');
 });
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'node.html'));
+})
+
 // Endpoints
 // 1. Retrieve all events
 app.get('/events', (req, res) => {
