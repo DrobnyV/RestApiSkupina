@@ -19,13 +19,6 @@ db.connect(err => {
     console.log('Connected to the MySQL database!');
 });
 
-app.use(express.static(path.join(__dirname)));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'node.html'));
-})
-
-
 // Endpoints
 // 1. Retrieve all events
 app.get('/events', (req, res) => {
@@ -81,7 +74,7 @@ app.delete('/events/:event_id', (req, res) => {
 });
 
 // Start the server
-const PORT = 3000;
+const PORT = 3300;
 app.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}`);
 });
